@@ -1,15 +1,26 @@
 import '@/styles/globals.css'
+import { useState, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
-import { RoleProvider } from '@/lib/roleContext'
+import { RoleProvider, useRole } from '@/lib/roleContext'
 import { ThemeProvider } from '@/lib/themeContext'
 import Navbar from '@/components/Navbar'
 import { useRouter } from 'next/router'
 
 function AppContent({ Component, pageProps }) {
   const router = useRouter()
+  const { role } = useRole()
   const isAdminPage = router.pathname.startsWith('/admin')
   const isHomePage = router.pathname === '/'
   const isAuthPage = router.pathname === '/login' || router.pathname === '/register'
+
+  const [hasMounted, setHasMounted] = useState(false)
+  useEffect(() => { setHasMounted(true) }, [])
+  useEffect(() => {
+    if (!hasMounted) return
+    if (isAdminPage && role !== 'admin') {
+      router.replace('/403')
+    }
+  }, [hasMounted, role, isAdminPage])
 
   return (
     <>
